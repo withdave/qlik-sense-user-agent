@@ -50,6 +50,7 @@ export default function supernova(galaxy) {
       // Set the user agent in the Qlik variable and render the content
       const userAgent = navigator.userAgent;
       const userAgentIsMobile = userAgent.includes("Mobi");
+      const userAgentType = userAgentIsMobile ? "mobile" : "web";
       const variableName = layout.variableName || "vUserAgent";
 
       // Check if the variable exists and create it if it doesn't
@@ -69,28 +70,36 @@ export default function supernova(galaxy) {
             // Redirect handling for identity
             const url = new URL(window.location.href);
             const pathParts = url.pathname.split('/');
-            const identityIndex = pathParts.indexOf('identity');
+            const identityIndex = pathParts.findIndex(part => part.toLowerCase() === 'identity');
+            let shouldRedirect = false;
+
+            // need to add "shouldRedirect code"
             if (identityIndex !== -1 && pathParts[identityIndex + 1]) {
-            const wildcardValue = pathParts[identityIndex + 1].toLowerCase();
-            if (userAgentIsMobile) {
+              const wildcardValue = pathParts[identityIndex + 1].toLowerCase();
+              if (userAgentIsMobile && wildcardValue !== 'mobile') {
               pathParts[identityIndex + 1] = 'mobile';
-            } else if (wildcardValue === 'mobile') {
+              shouldRedirect = true;
+              } else if (!userAgentIsMobile && wildcardValue === 'mobile') {
               pathParts[identityIndex + 1] = 'web';
+              shouldRedirect = true;
+              }
+            } else if (userAgentIsMobile && identityIndex === -1) {
+              pathParts.push('identity', 'mobile');
+              shouldRedirect = true;
             }
             const newUrl = `${url.origin}${pathParts.join('/')}`;
-            console.log(`Redirecting to: ${newUrl}`);
-            window.location.href = newUrl;
+            if (shouldRedirect) {
+              console.log(`Redirecting to: ${newUrl}`);
+              window.location.href = newUrl;
             }
 
           try {
             let variable;
             try {
               variable = await qlikApp.getVariableByName({ qName: variableName });
-              console.log(`Variable ${variableName} exists.`, variable);
             } catch {
               variable = await qlikApp.createSessionVariable(newVariable);
               variable = await qlikApp.getVariableByName({ qName: variableName });
-              console.log(`Session variable ${variableName} created.`, variable);
             }
             await variable.setStringValue(userAgent);
             console.log(`Session variable ${variableName} set to: ${userAgent}`);
