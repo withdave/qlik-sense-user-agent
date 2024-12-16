@@ -40,17 +40,10 @@ export default function supernova(galaxy) {
       const el = useElement();
       const layout = useLayout();
       const qlikApp = useApp();
-      console.log("App:", qlikApp);
-
-      // Apply basic styles to the container
-      el.style.padding = "10px";
-      el.style.fontFamily = "Arial, sans-serif";
-      el.style.fontSize = "14px";
 
       // Set the user agent in the Qlik variable and render the content
       const userAgent = navigator.userAgent;
       const userAgentIsMobile = userAgent.includes("Mobi");
-      const userAgentType = userAgentIsMobile ? "mobile" : "web";
       const variableName = layout.variableName || "vUserAgent";
 
       // Check if the variable exists and create it if it doesn't
