@@ -137,4 +137,6 @@ dist/
 test/integration/artifacts
 test/integration/test-report
 
+# Exclude build folders for sense
 user-agent-reporter-ext.zip
+user-agent-reporter-ext/
