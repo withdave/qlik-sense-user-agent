@@ -12,28 +12,9 @@ export default function supernova(galaxy) {
       properties: {
         properties,
         data,
-        initial: {
-          variableName: "vUserAgent",
-        },
       },
     },
-    definition: {
-      type: "items",
-      component: "accordion",
-      items: {
-        settings: {
-          uses: "settings",
-          items: {
-            variableName: {
-              ref: "variableName",
-              type: "string",
-              label: "Variable Name",
-              defaultValue: "vUserAgent",
-            },
-          },
-        },
-      },
-    },
+    
     ext: ext(galaxy), // Ensure ext is correctly imported and used
     component() {
       // Stardust hooks
@@ -44,7 +25,7 @@ export default function supernova(galaxy) {
       // Set the user agent in the Qlik variable and render the content
       const userAgent = navigator.userAgent;
       const userAgentIsMobile = userAgent.includes("Mobi");
-      const variableName = layout.variableName || "vUserAgent";
+      const variableName = "vUserAgent";
 
       // Check if the variable exists and create it if it doesn't
       const updateVariable = async () => {
@@ -62,6 +43,7 @@ export default function supernova(galaxy) {
 
             // Redirect handling for identity
             const url = new URL(window.location.href);
+            console.log(`URL: ${url}`);
             const pathParts = url.pathname.split('/');
             const identityIndex = pathParts.findIndex(part => part.toLowerCase() === 'identity');
             let shouldRedirect = false;
@@ -80,8 +62,8 @@ export default function supernova(galaxy) {
               pathParts.push('identity', 'mobile');
               shouldRedirect = true;
             }
-            const newUrl = `${url.origin}${pathParts.join('/')}`;
-            if (shouldRedirect) {
+            const newUrl = `${url.origin}${pathParts.join('/')}${url.search}`;
+            if (shouldRedirect && !newUrl.includes("http://localhost:8000/dev/")) {
               console.log(`Redirecting to: ${newUrl}`);
               window.location.href = newUrl;
             }
