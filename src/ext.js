@@ -2,10 +2,10 @@ export default function ext(/* galaxy */) {
   return {
     support: {
       snapshot: false,
-      export: true,
+      export: false,
       sharing: false,
-      exportData: true,
-      viewData: true,
+      exportData: false,
+      viewData: false,
     },
   };
 }
