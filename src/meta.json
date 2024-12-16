@@ -1,5 +1,5 @@
 {
-  "name": "user-agent-reporter",
+  "name": "User Agent Reporter",
   "icon": "extension",
   "preview": "user-agent.png",
   "type": "visualization"
