@@ -128,3 +128,13 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# nebula
+node_modules
+coverage
+dist/
+
+test/integration/artifacts
+test/integration/test-report
+
+user-agent-reporter-ext.zip

@@ -1,0 +1,6 @@
+{
+  "name": "user-agent-reporter",
+  "icon": "extension",
+  "preview": "user-agent.png",
+  "type": "visualization"
+}
