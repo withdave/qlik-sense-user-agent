@@ -63,7 +63,7 @@ jobs:
                 console.log(`Deleted draft release v${VERSION}.`);
               } else {
                 console.error(`Release v${VERSION} already exists and is published.`);
-                core.setFailed(`Release v${VERSION} already exists.`);
+                core.setFailed(`Release v${VERSION} already exists. Ensure you have bumped the release version in package.json.`);
               }
             }
           }
