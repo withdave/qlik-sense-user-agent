@@ -41,3 +41,9 @@ npm run build
 npm run sense
 zip -r user-agent-reporter.zip user-agent-reporter-ext
 ```
+
+## Releasing with this repo
+
+Use the `Create Release` workflow to generate the extension asset and draft a release.
+Ensure you have updated the version before building, as if the tag already exists
+the workflow will exit with an error.
