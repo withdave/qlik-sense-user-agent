@@ -3,6 +3,9 @@ name: Create Release
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -28,32 +31,40 @@ jobs:
 
     - name: Get package version
       id: get_version
-      run: echo "VERSION=$(node -p -e \"require('./package.json').version\")" >> $GITHUB_ENV
+      run: |
+        VERSION=$(node -e "console.log(require('./package.json').version)")
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Check for existing release
       id: check_release
-      uses: actions/github-script@v4
+      uses: actions/github-script@v7
+      env:
+        VERSION: ${{ env.VERSION }}
       with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          const version = process.env.VERSION;
-          const { data: releases } = await github.repos.listReleases({
+          const { VERSION } = process.env;
+          console.log(`Checking for existing release: v${VERSION}`);
+
+          const { data: releases } = await github.rest.repos.listReleases({
             owner: context.repo.owner,
             repo: context.repo.repo,
           });
-          console.log(`Found ${releases.length} existing releases.`);
 
-          const release = releases.find(r => r.tag_name === `v${version}`);
-          if (release) {
-            if (release.draft) {
-              console.log(`Draft release v${version} exists. Deleting...`);
-              await github.repos.deleteRelease({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                release_id: release.id,
-              });
-            } else {
-              console.error(`Release v${version} already exists.`);
-              core.setFailed(`Release v${version} already exists.`);
+          for (const release of releases) {
+            if (release.tag_name === `v${VERSION}`) {
+              if (release.draft) {
+                console.log(`Draft release v${VERSION} exists. Deleting it...`);
+                await github.rest.repos.deleteRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  release_id: release.id,
+                });
+                console.log(`Deleted draft release v${VERSION}.`);
+              } else {
+                console.error(`Release v${VERSION} already exists and is published.`);
+                core.setFailed(`Release v${VERSION} already exists.`);
+              }
             }
           }
 
@@ -66,33 +77,13 @@ jobs:
     - name: Zip extension
       run: zip -r user-agent-reporter.zip user-agent-reporter-ext
 
-    - name: Create new release
-      id: create_release
-      uses: actions/github-script@v4
-      with:
-        script: |
-          try {
-            const version = process.env.VERSION;
-            const release = await github.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: `v${version}`,
-              name: `v${version}`,
-              draft: true,
-            });
-            console.log(`Release v${version} created successfully.`);
-            core.setOutput("release_id", release.data.id);
-          } catch (error) {
-            console.error(`Failed to create release: ${error.message}`);
-            core.setFailed(error.message);
-          }
-
     - name: Upload release asset
       uses: softprops/action-gh-release@v1
       with:
         files: ./user-agent-reporter.zip
         tag_name: v${{ env.VERSION }}
         draft: true
+        body: "Please find attached version v${{ env.VERSION }} of the user-agent-exporter extension. The attached user-agent-reporter.zip can be uploaded directly to a Qlik Cloud tenant for use."
 
     - name: Post release link
-      run: 'echo "✅ Release created successfully: https://github.com/${{ github.repository }}/releases/tag/v${{ env.VERSION }}"'
+      run: 'echo "✅ View all draft releases: https://github.com/${{ github.repository }}/releases?filter=drafts"'
