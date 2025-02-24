@@ -1,6 +1,10 @@
 # qlik-sense-user-agent
 
-A nebula extension which tracks the user's user agent.
+A nebula extension (named `user-agent-reporter`) which tracks the user's user agent
+and redirects them to a new Qlik Sense session identity if conditions are met.
+
+This does some simple handling for native usage of Qlik Cloud Analytics, but
+is unlikely to work as expected in web apps/ mashups.
 
 ## Usage
 
@@ -29,9 +33,11 @@ cause an update of the user agent in the order in which they make updates.
 
 ## Building
 
-To build for Qlik Sense.
+To build for Qlik Sense & create extension zip.
 
 ```js
+npm install
 npm run build
 npm run sense
+zip -r user-agent-reporter.zip user-agent-reporter-ext
 ```
