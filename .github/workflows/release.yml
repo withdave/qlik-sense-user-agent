@@ -41,6 +41,7 @@ jobs:
       env:
         VERSION: ${{ env.VERSION }}
       with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const { VERSION } = process.env;
           console.log(`Checking for existing release: v${VERSION}`);
@@ -50,19 +51,20 @@ jobs:
             repo: context.repo.repo,
           });
 
-          const existingRelease = releases.find(r => r.tag_name === `v${VERSION}`);
-
-          if (existingRelease) {
-            if (existingRelease.draft) {
-              console.log(`Draft release v${VERSION} exists. Deleting it...`);
-              await github.rest.repos.deleteRelease({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                release_id: existingRelease.id,
-              });
-            } else {
-              console.error(`Release v${VERSION} already exists.`);
-              core.setFailed(`Release v${VERSION} already exists.`);
+          for (const release of releases) {
+            if (release.tag_name === `v${VERSION}`) {
+              if (release.draft) {
+                console.log(`Draft release v${VERSION} exists. Deleting it...`);
+                await github.rest.repos.deleteRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  release_id: release.id,
+                });
+                console.log(`Deleted draft release v${VERSION}.`);
+              } else {
+                console.error(`Release v${VERSION} already exists and is published.`);
+                core.setFailed(`Release v${VERSION} already exists.`);
+              }
             }
           }
 
@@ -81,6 +83,7 @@ jobs:
         files: ./user-agent-reporter.zip
         tag_name: v${{ env.VERSION }}
         draft: true
+        body: "Please find attached version v${{ env.VERSION }} of the user-agent-exporter extension. The attached user-agent-reporter.zip can be uploaded directly to a Qlik Cloud tenant for use."
 
     - name: Post release link
-      run: 'echo "✅ Release created successfully: https://github.com/${{ github.repository }}/releases/tag/v${{ env.VERSION }}"'
+      run: 'echo "✅ View all draft releases: https://github.com/${{ github.repository }}/releases?filter=drafts"'
