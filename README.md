@@ -3,6 +3,13 @@
 A nebula extension (named `user-agent-reporter`) which tracks the user's user agent
 and redirects them to a new Qlik Sense session identity if conditions are met.
 
+The native function [ClientPlatform()](https://help.qlik.com/en-US/cloud-services/Subsystems/Hub/Content/Sense_Hub/Scripting/SystemFunctions/system-functions.htm)
+is set for an engine session by the first device to connect to the session, hence any subsequent
+logins by that same user from another device (with the same identity) will not update the `ClientPlatform`.
+This means you cannot use `ClientPlatform` for any device-specific customization if users will be
+logging in from multiple devices. This extension forces isolation of user sessions by using the
+identity for either desktop or mobile sessions.
+
 This does some simple handling for native usage of Qlik Cloud Analytics, but
 is unlikely to work as expected in web apps/ mashups.
 
@@ -30,6 +37,7 @@ Notes:
 - Since this sets a session variable, this is maintained on the engine session by
 the engine. As such, multiple clients accessing the app with the same user will each
 cause an update of the user agent in the order in which they make updates.
+- This is not a security control. User agents are trivial for clients to spoof.
 
 ## Building
 
